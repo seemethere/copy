@@ -48,16 +48,12 @@ RUN wget http://s.minos.io/archive/bifrost/x86_64/xz-5.0.3-1.tar.gz && \
   echo "1449e0b209169c559ed1f4c906d76bbcf27607c072484ab852523df86ee39450  xz-5.0.3-1.tar.gz" | sha256sum -c
 RUN tar xvf xz-5.0.3-1.tar.gz  -C /out
 
-# amd release stage is different from other arch and only has static binaries
-FROM scratch AS release-amd64
-COPY --from=upx /copy /bin/
-COPY --from=tar /out/bin /bin/
-COPY --from=gz /out/bin /bin/
-COPY --from=bz /out/bin /bin/
-COPY --from=xz /out/usr/bin /bin/
-
 FROM alpine AS base-inline
 RUN apk add --no-cache tar gzip bzip2 xz
+
+# amd release stage is different from other arch and only has static binaries
+FROM base-inline AS release-amd64
+COPY --from=upx /copy /bin/
 
 FROM tonistiigi/copy:$TARGETARCH$TARGETVARIANT-base AS base-external
 
